@@ -9,7 +9,7 @@ const LandingPage = () => {
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                {/* Animated Background Shapes */}
+                
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 overflow-hidden">
                     <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-emerald-500/10 dark:bg-emerald-500/20 rounded-full blur-[120px] animate-pulse"></div>
                     <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-teal-500/10 dark:bg-teal-500/20 rounded-full blur-[120px] animate-pulse delay-700"></div>
@@ -53,7 +53,7 @@ const LandingPage = () => {
                 </div>
             </section>
 
-            {/* Core Outcomes / Mission Section */}
+            
             <section id="mission" className="py-24 bg-gray-50/50 dark:bg-gray-900/50 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
