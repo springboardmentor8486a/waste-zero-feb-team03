@@ -1,0 +1,8 @@
+node_modules/
+.env
+.DS_Store
+*.log
+.gemini/
+brain/
+playground-1.mongodb.js
+C:/Users/Vaishnavi/volunteer-platform-backend/playground-1.mongodb.js
