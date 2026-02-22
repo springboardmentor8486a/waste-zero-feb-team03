@@ -14,12 +14,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Determine dashboard path based on user role
   const dashboardPath = user?.role?.toLowerCase() === "ngo"
@@ -112,7 +113,10 @@ const Sidebar = () => {
       {/* Bottom Section */}
       <div className="space-y-4">
         <button
-          onClick={logout}
+          onClick={() => {
+            logout();
+            navigate("/");
+          }}
           className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors font-medium shadow-lg shadow-red-500/20"
         >
           <LogOut size={18} />

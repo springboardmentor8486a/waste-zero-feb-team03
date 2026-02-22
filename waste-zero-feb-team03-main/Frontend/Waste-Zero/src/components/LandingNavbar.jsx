@@ -36,9 +36,6 @@ const LandingNavbar = () => {
                         <a href="#mission" className="font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
                             Features
                         </a>
-                        <a href="#impact" className="font-medium text-gray-600 dark:text-gray-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
-                            Impact
-                        </a>
                         <Link
                             to="/login"
                             className="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full font-semibold transition-all hover:shadow-emerald-500/25 hover:shadow-lg active:scale-95"
@@ -72,13 +69,6 @@ const LandingNavbar = () => {
                         className="block text-lg font-medium text-gray-600 dark:text-gray-300"
                     >
                         Features
-                    </a>
-                    <a
-                        href="#impact"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="block text-lg font-medium text-gray-600 dark:text-gray-300"
-                    >
-                        Impact
                     </a>
                     <Link
                         to="/login"

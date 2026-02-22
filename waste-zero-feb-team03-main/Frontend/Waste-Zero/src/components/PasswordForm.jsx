@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../services/api";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function PasswordForm() {
 
@@ -7,6 +8,8 @@ export default function PasswordForm() {
     currentPassword: "",
     newPassword: ""
   });
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,32 +29,50 @@ export default function PasswordForm() {
   return (
     <form onSubmit={handleSubmit} className="p-8 space-y-6">
 
-      <div>
+      <div className="relative">
         <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Current Password</label>
-        <input
-          type="password"
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-          value={form.currentPassword}
-          onChange={(e) =>
-            setForm({ ...form, currentPassword: e.target.value })
-          }
-          placeholder="Enter your current password"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showCurrentPassword ? "text" : "password"}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all pr-12"
+            value={form.currentPassword}
+            onChange={(e) =>
+              setForm({ ...form, currentPassword: e.target.value })
+            }
+            placeholder="Enter your current password"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors"
+          >
+            {showCurrentPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
       </div>
 
-      <div>
+      <div className="relative">
         <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">New Password</label>
-        <input
-          type="password"
-          className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-          value={form.newPassword}
-          onChange={(e) =>
-            setForm({ ...form, newPassword: e.target.value })
-          }
-          placeholder="Enter your new password"
-          required
-        />
+        <div className="relative">
+          <input
+            type={showNewPassword ? "text" : "password"}
+            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all pr-12"
+            value={form.newPassword}
+            onChange={(e) =>
+              setForm({ ...form, newPassword: e.target.value })
+            }
+            placeholder="Enter your new password"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowNewPassword(!showNewPassword)}
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-emerald-500 transition-colors"
+          >
+            {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters long</p>
       </div>
 
