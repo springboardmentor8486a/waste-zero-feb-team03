@@ -30,7 +30,7 @@ export const updateMyProfile = async (req, res) => {
     user.location = req.body.location || user.location;
 
     if (req.body.email) {
-        return res.status(400).json({ message: "Email cannot be changed" });
+      return res.status(400).json({ message: "Email cannot be changed" });
     }
 
     if (req.body.role) {

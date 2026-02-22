@@ -22,8 +22,8 @@ const Sidebar = () => {
   const location = useLocation();
 
   // Determine dashboard path based on user role
-  const dashboardPath = user?.role?.toLowerCase() === "ngo" 
-    ? "/dashboard/ngo" 
+  const dashboardPath = user?.role?.toLowerCase() === "ngo"
+    ? "/dashboard/ngo"
     : "/dashboard/volunteer";
 
   const menuItems = [
@@ -43,16 +43,16 @@ const Sidebar = () => {
 
   const NavItem = ({ item }) => {
     // Special handling for Dashboard to highlight both /dashboard/ngo and /dashboard/volunteer
-    const isActive = item.label === "Dashboard" 
+    const isActive = item.label === "Dashboard"
       ? location.pathname.startsWith("/dashboard")
       : location.pathname.startsWith(item.path);
-    
+
     return (
       <Link
         to={item.path}
         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${isActive
-            ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20"
-            : "text-gray-400 hover:text-emerald-500 hover:bg-gray-50 dark:hover:bg-gray-800"
+          ? "text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20"
+          : "text-gray-400 hover:text-emerald-500 hover:bg-gray-50 dark:hover:bg-gray-800"
           }`}
       >
         <item.icon size={20} />
