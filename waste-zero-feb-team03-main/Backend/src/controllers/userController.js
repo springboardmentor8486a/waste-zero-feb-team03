@@ -55,20 +55,11 @@ export const changePassword = async (req, res) => {
       });
     }
 
-    if (
-      !validator.isStrongPassword(newPassword, {
-        minLength: 8,
-        minLowercase: 1,
-        minUppercase: 1,
-        minNumbers: 1,
-      minSymbols: 1,
-    })
-) {
-  return res.status(400).json({
-    message:
-      "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character",
-  });
-}
+    if (newPassword.length < 6) {
+      return res.status(400).json({
+        message: "New password must be at least 6 characters long",
+      });
+    }
 
     const user = await User.findById(req.user._id).select("+password");
 
