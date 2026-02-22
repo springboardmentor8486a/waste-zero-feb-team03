@@ -42,8 +42,6 @@ const opportunityDataArbitrary = fc.record({
 });
 
 describe('Opportunity Property-Based Tests', () => {
-  // **Feature: volunteer-opportunity-platform, Property 1: Opportunity creation associates with creator**
-  // **Validates: Requirements 1.1**
   test('Property 1: For any authenticated NGO user and valid opportunity data, creating an opportunity should associate it with the creator', async () => {
     await fc.assert(
       fc.asyncProperty(ngoUserArbitrary, opportunityDataArbitrary, async (userData, oppData) => {
@@ -63,8 +61,7 @@ describe('Opportunity Property-Based Tests', () => {
     );
   }, 60000);
 
-  // **Feature: volunteer-opportunity-platform, Property 10: Filter by skill returns matching opportunities**
-  // **Validates: Requirements 2.2**
+
   test('Property 10: For any skill search query, all returned opportunities should include that skill', async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -110,9 +107,6 @@ describe('Opportunity Property-Based Tests', () => {
       { numRuns: 10 }
     );
   }, 60000);
-
-  // **Feature: volunteer-opportunity-platform, Property 11: Filter by location returns matching opportunities**
-  // **Validates: Requirements 2.3**
   test('Property 11: For any location search query, all returned opportunities should match that location', async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -157,8 +151,6 @@ describe('Opportunity Property-Based Tests', () => {
     );
   }, 60000);
 
-  // **Feature: volunteer-opportunity-platform, Property 13: Only open opportunities are publicly visible**
-  // **Validates: Requirements 2.1**
   test('Property 13: For any request to list all opportunities, all returned opportunities should have status open', async () => {
     await fc.assert(
       fc.asyncProperty(
@@ -198,9 +190,6 @@ describe('Opportunity Property-Based Tests', () => {
       { numRuns: 5 }
     );
   }, 60000);
-
-  // **Feature: volunteer-opportunity-platform, Property 5: Opportunity deletion cascades to applications**
-  // **Validates: Requirements 1.5**
   test('Property 5: For any opportunity with associated applications, deleting the opportunity should remove all associated applications', async () => {
     await fc.assert(
       fc.asyncProperty(
