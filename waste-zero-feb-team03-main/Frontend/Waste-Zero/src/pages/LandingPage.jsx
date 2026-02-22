@@ -119,9 +119,6 @@ const LandingPage = () => {
                     <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md mx-auto">
                         Promoting responsible waste management and smart recycling through digital innovation.
                     </p>
-                    <div className="text-sm text-gray-400 dark:text-gray-600">
-                        © 2026 WasteZero Platform. All rights reserved.
-                    </div>
                 </div>
             </footer>
         </div>
