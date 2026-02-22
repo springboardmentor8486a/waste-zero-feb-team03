@@ -17,6 +17,9 @@ export default function PasswordForm() {
       setForm({ currentPassword: "", newPassword: "" });
     } catch (err) {
       console.error("Password update failed:", err);
+
+      const message = err.response?.data?.message || "Password update failed";
+      alert(message);
     }
   };
 

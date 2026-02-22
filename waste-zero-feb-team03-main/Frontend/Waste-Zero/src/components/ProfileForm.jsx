@@ -32,6 +32,7 @@ export default function ProfileForm() {
   // 🔹 Update profile
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("Form submitted");
 
     try {
       await api.put("/users/me", form);

@@ -1,6 +1,6 @@
 # Waste Zero Initiative ♻️
 
-**Join the Recycling Revolution.** 
+**Join the Recycling Revolution.**
 
 Waste Zero is a next-generation digital platform designed to help communities schedule waste pickups, categorize recyclables responsibly, and promote sustainable waste management habits. By connecting residents with intelligent pickup agents and providing transparent impact statistics, we aim to eliminate waste and protect our environment.
 
@@ -9,6 +9,7 @@ Waste Zero is a next-generation digital platform designed to help communities sc
 Waste Zero streamlines the lifecycle of waste management through a professional, secure, and user-centric platform.
 
 **Key Outcomes**
+
 - **Intelligent Pickups**: Effortlessly schedule waste collections using our dynamic backend.
 - **Smart Categorization**: Sort waste into **Plastic, Organic, E-waste**, and more for optimal recycling.
 - **Dynamic agent assignment**: Pickup agents are assigned intelligently based on location for maximum efficiency.
@@ -18,6 +19,7 @@ Waste Zero streamlines the lifecycle of waste management through a professional,
 ## 🛠️ Technology Stack
 
 ### Frontend
+
 - **Framework**: React 19 (Vite)
 - **Styling**: Tailwind CSS (Premium UI/UX with Glassmorphism)
 - **Icons**: Lucide-React
@@ -25,6 +27,7 @@ Waste Zero streamlines the lifecycle of waste management through a professional,
 - **Routing**: React Router DOM
 
 ### Backend
+
 - **Runtime**: Node.js & Express
 - **Database**: MongoDB (Mongoose)
 - **Security**: JWT Authentication & Bcrypt password hashing
@@ -38,6 +41,7 @@ Waste Zero streamlines the lifecycle of waste management through a professional,
 ## ⚙️ Getting Started
 
 ### Backend Setup
+
 1. Navigate to the `Backend` directory:
    ```bash
    cd Backend
@@ -55,6 +59,7 @@ Waste Zero streamlines the lifecycle of waste management through a professional,
    ```
 
 ### Frontend Setup
+
 1. Navigate to the `Frontend/Waste-Zero` directory:
    ```bash
    cd Frontend/Waste-Zero
