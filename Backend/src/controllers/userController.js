@@ -19,6 +19,10 @@ export const getMyProfile = async (req, res) => {
 // @access Private
 export const updateMyProfile = async (req, res) => {
   try {
+
+    // Prevent changing email and role
+    delete req.body.email;
+    delete req.body.role;
     const user = await User.findById(req.user._id);
 
     if (!user) {
@@ -29,14 +33,6 @@ export const updateMyProfile = async (req, res) => {
     user.skills = req.body.skills || user.skills;
     user.bio = req.body.bio || user.bio;
     user.location = req.body.location || user.location;
-
-    if (req.body.email) {
-        return res.status(400).json({ message: "Email cannot be changed" });
-    }
-
-    if (req.body.role) {
-      return res.status(400).json({ message: "Role cannot be changed" });
-    }
 
     const updatedUser = await user.save();
 
@@ -53,17 +49,28 @@ export const changePassword = async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) { 
-      return res.status(400).json({ message: "All fields are required" }); 
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        message: "Both current and new passwords are required",
+      });
     }
 
-    if (!validator.isStrongPassword(newPassword)) { 
-      return res.status(400).json({ 
-        message: "Password must be stronger", 
-      }); 
-    }
+    if (
+      !validator.isStrongPassword(newPassword, {
+        minLength: 8,
+        minLowercase: 1,
+        minUppercase: 1,
+        minNumbers: 1,
+      minSymbols: 1,
+    })
+) {
+  return res.status(400).json({
+    message:
+      "Password must contain at least 8 characters, one uppercase letter, one lowercase letter, one number, and one special character",
+  });
+}
 
-    const user = await User.findById(req.user.id).select("+password");
+    const user = await User.findById(req.user._id).select("+password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
@@ -72,17 +79,18 @@ export const changePassword = async (req, res) => {
     const isMatch = await user.comparePassword(currentPassword);
 
     if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
+      return res.status(401).json({
+        message: "Current password is incorrect",
+      });
     }
 
     user.password = newPassword;
+    await user.save();
 
-    await user.save(); 
+    res.json({ message: "Password updated successfully" });
 
-    res.status(200).json({
-      message: "Password changed successfully"
-    });
-  } catch (error) { 
-    res.status(500).json({ message: error.message }); 
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
 };
+
