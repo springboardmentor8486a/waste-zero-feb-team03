@@ -6,9 +6,9 @@ import validator from "validator";
 // @route POST /auth/register
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, location } = req.body;
 
-    if (!name || !email || !password || !role) {
+    if (!name || !email || !password || !role || !location) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -28,6 +28,7 @@ export const registerUser = async (req, res) => {
       email,
       password,
       role,
+      location,
     });
 
     res.status(201).json({
@@ -35,6 +36,7 @@ export const registerUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      location: user.location,
       token: generateToken(user._id),
     });
   } catch (error) {
@@ -60,6 +62,7 @@ export const loginUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        location: user.location,
         token: generateToken(user._id),
       });
     } else {
@@ -69,3 +72,4 @@ export const loginUser = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
