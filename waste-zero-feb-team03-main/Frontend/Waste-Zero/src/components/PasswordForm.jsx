@@ -73,15 +73,13 @@ export default function PasswordForm() {
             {showNewPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 8 characters long</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Must be at least 6 characters long</p>
       </div>
 
       <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-4 rounded-lg">
-        <p className="text-sm text-blue-800 dark:text-blue-400"><strong>Password Tips:</strong></p>
+        <p className="text-sm text-blue-800 dark:text-blue-400"><strong>Password Rule:</strong></p>
         <ul className="text-xs text-blue-700 dark:text-blue-300 mt-2 space-y-1 ml-4 list-disc">
-          <li>Use a mix of uppercase and lowercase letters</li>
-          <li>Include numbers and special characters</li>
-          <li>Make it at least 8 characters long</li>
+          <li>Must be at least 6 characters long</li>
         </ul>
       </div>
 
