@@ -12,12 +12,6 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (!validator.isStrongPassword(password)) {
-      return res.status(400).json({
-        message: "Password must be stronger",
-      });
-    }
-
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
