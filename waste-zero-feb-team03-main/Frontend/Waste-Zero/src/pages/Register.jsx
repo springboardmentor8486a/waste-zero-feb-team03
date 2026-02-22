@@ -107,7 +107,7 @@ export default function Register() {
                 value={form.password}
                 onChange={handleChange}
                 className="w-full border rounded-lg px-4 py-2 pr-10 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                placeholder="Password"
+                placeholder="Password (min 6 chars)"
                 required
               />
               <button
@@ -136,6 +136,9 @@ export default function Register() {
                 {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 mt-[-10px] ml-1">
+              * Password must be at least 6 characters long.
+            </p>
 
             <button
               type="submit"
