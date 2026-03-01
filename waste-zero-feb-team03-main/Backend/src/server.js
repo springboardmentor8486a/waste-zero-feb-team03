@@ -19,6 +19,7 @@ app.use("/users", userRoutes);
 
 // opportunity endpoints (public + protected)
 app.use("/opportunities", opportunityRoutes);
+app.use("/opportunities", opportunityRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend is running...");
