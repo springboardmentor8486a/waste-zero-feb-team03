@@ -6,9 +6,11 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/loginpage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import CreateOpportunity from "./pages/CreateOpportunity";
 import VolunteerDashboard from "./pages/Dashboard/VolunteerDashboard";
 import NGODashboard from "./pages/Dashboard/NGODashboard";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+
 
 function App() {
   return (
@@ -35,6 +37,7 @@ function App() {
               element={
                 <ProtectedRoute role="ngo">
                   <NGODashboard />
+                  <CreateOpportunity />
                 </ProtectedRoute>
               }
             />
