@@ -2,11 +2,13 @@ import { useAuth } from "../../context/AuthContext";
 import { useState, useEffect } from "react";
 import api from "../../services/api";
 import DashboardLayout from "../../components/DashboardLayout";
+import { useNavigate } from "react-router-dom";
 
 const NGODashboard = () => {
   const { user } = useAuth();
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMyOpportunities = async () => {
@@ -56,9 +58,12 @@ const NGODashboard = () => {
 
         {/* Action Buttons */}
         <div className="flex gap-4 flex-wrap">
-          <button className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all font-semibold flex items-center gap-2">
-            <span>+</span> Create New Opportunity
-          </button>
+          <button
+           onClick={() => navigate("/create-opportunity")}
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-8 py-3 rounded-lg shadow-md hover:shadow-lg transition-all font-semibold flex items-center gap-2"
+              >
+             <span>+</span> Create New Opportunity
+              </button>
           <button className="bg-white dark:bg-gray-800 text-gray-700 dark:text-white border-2 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 px-8 py-3 rounded-lg transition-all font-semibold">
             Manage Listings
           </button>
@@ -121,9 +126,12 @@ const NGODashboard = () => {
                       }`}>
                         {opp.status.charAt(0).toUpperCase() + opp.status.slice(1)}
                       </span>
-                      <button className="text-emerald-600 hover:text-emerald-700 dark:hover:text-emerald-400 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 py-2 rounded transition-colors">
-                        Edit
-                      </button>
+                      <button 
+                              onClick={() => navigate(`/opportunities/edit/${opp._id}`)} // Use backticks and ${}
+                              className="text-emerald-600 font-bold hover:underline cursor-pointer"
+                            >
+                              Edit
+                            </button>
                     </div>
                   </div>
                 </div>
