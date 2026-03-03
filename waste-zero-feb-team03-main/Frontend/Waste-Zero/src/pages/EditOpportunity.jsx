@@ -13,12 +13,11 @@ const EditOpportunity = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("Step 1: Fetching data for ID:", id); // Check console
+      console.log("Step 1: Fetching data for ID:", id);
       try {
         const res = await getOpportunityById(id);
-        console.log("Step 2: API Response Received:", res); // Check console
+        console.log("Step 2: API Response Received:", res);
         
-        // Some APIs wrap data in 'res.data', others return it directly
         const result = res.data || res;
         
         if (!result || Object.keys(result).length === 0) {
@@ -101,7 +100,13 @@ const EditOpportunity = () => {
 
         <div className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white dark:border-slate-800 overflow-hidden">
           <div className="p-8 md:p-12">
-            <OpportunityForm initialData={data} onSubmit={handleUpdate} isLoading={false} />
+            {/* Added buttonText prop here */}
+            <OpportunityForm 
+              initialData={data} 
+              onSubmit={handleUpdate} 
+              isLoading={false} 
+              buttonText="Update Opportunity" 
+            />
           </div>
         </div>
       </div>

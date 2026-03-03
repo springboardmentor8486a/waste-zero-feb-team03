@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Send } from 'lucide-react';
 
-const OpportunityForm = ({ onSubmit, isLoading, initialData = {} }) => {
+// Added buttonText prop with a default value of "Post Opportunity"
+const OpportunityForm = ({ onSubmit, isLoading, initialData = {}, buttonText = "Post Opportunity" }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -11,7 +12,7 @@ const OpportunityForm = ({ onSubmit, isLoading, initialData = {} }) => {
     status: 'open'
   });
 
-  // CRITICAL: Sync form state when initialData arrives from the API
+  // Sync form state when initialData arrives from the API
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData({
@@ -77,7 +78,8 @@ const OpportunityForm = ({ onSubmit, isLoading, initialData = {} }) => {
         className="w-full md:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
       >
         {isLoading ? <Loader2 className="animate-spin" /> : <Send size={18} />}
-        {isLoading ? "Saving..." : "Update Opportunity"}
+        {/* Dynamic button text logic: uses the prop if provided, else defaults to "Post Opportunity" */}
+        {isLoading ? "Saving..." : buttonText}
       </button>
     </form>
   );
