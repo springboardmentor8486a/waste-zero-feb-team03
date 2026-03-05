@@ -36,6 +36,15 @@ const opportunitySchema = new mongoose.Schema(
       index: true,
     },
 
+    // --- MILESTONE 2: APPLICANTS ARRAY ---
+    // This stores the IDs of volunteers who clicked "Apply"
+    applicants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
     status: {
       type: String,
       enum: ["open", "closed", "in-progress"],
