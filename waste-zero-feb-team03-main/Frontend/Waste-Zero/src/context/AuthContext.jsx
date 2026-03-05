@@ -4,16 +4,18 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  // ADD THIS: loading state
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const token = localStorage.getItem("token");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
+    const initializeAuth = async () => {
+      const storedUser = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
 
-    // optional: refresh profile from backend if token exists
-    const refreshProfile = async () => {
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+
       if (token) {
         try {
           const api = (await import("../services/api")).default;
@@ -22,10 +24,15 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem("user", JSON.stringify(res.data));
         } catch (err) {
           console.warn("Failed to refresh profile", err);
+          // Optional: clear if token is invalid
+          // logout(); 
         }
       }
+      // FINISHED CHECKING: set loading to false
+      setLoading(false); 
     };
-    refreshProfile();
+
+    initializeAuth();
   }, []);
 
   const login = (data) => {
@@ -39,8 +46,9 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  // PASS LOADING IN THE VALUE
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

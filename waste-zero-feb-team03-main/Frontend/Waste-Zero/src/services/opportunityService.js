@@ -1,9 +1,11 @@
 import axios from "axios";
 
+// Create the Axios instance with your backend URL
 const API = axios.create({
   baseURL: "http://localhost:5000",
 });
 
+// Automatically attach the JWT token to every request for Protected Routes
 API.interceptors.request.use((req) => {
   const token = localStorage.getItem("token");
   if (token) {
@@ -11,6 +13,8 @@ API.interceptors.request.use((req) => {
   }
   return req;
 });
+
+// --- BASIC OPPORTUNITY MANAGEMENT ---
 
 export const getAllOpportunities = () =>
   API.get("/opportunities");
@@ -26,3 +30,22 @@ export const updateOpportunity = (id, data) =>
 
 export const deleteOpportunity = (id) =>
   API.delete(`/opportunities/${id}`);
+
+// --- MILESTONE 2: VOLUNTEER & NGO INTERACTION ---
+
+/**
+ * Sends a request for the logged-in volunteer to apply for a task
+ * @param {string} id - The Opportunity ID (_id)
+ */
+export const applyToOpportunity = (id) => 
+  API.post(`/opportunities/${id}/apply`);
+
+/**
+ * Fetches the list of volunteers who applied for a specific task
+ * Accessible only by the NGO who created the task
+ * @param {string} id - The Opportunity ID (_id)
+ */
+export const getOpportunityApplicants = (id) => 
+  API.get(`/opportunities/${id}/applicants`);
+
+export default API;
