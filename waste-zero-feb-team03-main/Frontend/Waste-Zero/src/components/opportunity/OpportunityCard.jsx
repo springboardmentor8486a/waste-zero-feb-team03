@@ -1,22 +1,30 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { MapPin, Clock, Edit, Trash2, Users, Send } from "lucide-react";
+import { MapPin, Clock, Edit, Trash2, Users, Send, CheckCircle } from "lucide-react"; // Added CheckCircle
 import api from "../../services/api";
 
 const OpportunityCard = ({ opportunity, onDelete }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Flexible check to handle string vs object IDs and _id vs id naming
+  // NGO Ownership check
   const isOwner = user?.role === "ngo" && (
     user?.id === (opportunity?.ngo_id?._id || opportunity?.ngo_id) ||
     user?._id === (opportunity?.ngo_id?._id || opportunity?.ngo_id)
   );
 
+  // NEW: Check if the current volunteer has already applied
+  const hasApplied = opportunity.applicants?.some(applicantId => {
+    const idToCheck = applicantId._id || applicantId; // Handle populated vs non-populated IDs
+    return idToCheck === (user?.id || user?._id);
+  });
+
   const handleApply = async () => {
     try {
       await api.post(`/opportunities/${opportunity._id}/apply`);
       alert("Application submitted successfully!");
+      // Optional: Refresh the page or trigger a re-fetch to update the UI state
+      window.location.reload(); 
     } catch (err) {
       alert(err.response?.data?.message || "Error applying for opportunity");
     }
@@ -52,7 +60,6 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
             </span>
           </div>
 
-          {/* Display Skills/Tags if they exist */}
           {opportunity.required_skills && (
             <div className="flex gap-2 mt-4">
               {opportunity.required_skills.map((skill, index) => (
@@ -64,15 +71,12 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
           )}
         </div>
 
-        {/* ACTIONS SECTION */}
         <div className="flex items-center gap-2">
-          {/* NGO ACTIONS: Only visible to the owner */}
           {isOwner && (
             <>
               <button 
                 onClick={() => navigate(`/opportunities/${opportunity._id}/applicants`)}
                 className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 font-bold text-sm"
-                title="View Applicants"
               >
                 <Users size={18} /> Applicants
               </button>
@@ -91,13 +95,26 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
             </>
           )}
 
-          {/* VOLUNTEER ACTION: Fixed duplicate button */}
+          {/* VOLUNTEER ACTION: Conditional Rendering for Button State */}
           {user?.role === "volunteer" && (
             <button 
               onClick={handleApply}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg flex items-center gap-2 font-bold transition-colors"
+              disabled={hasApplied}
+              className={`px-6 py-2 rounded-lg flex items-center gap-2 font-bold transition-all ${
+                hasApplied 
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-700 dark:border-gray-600" 
+                  : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg"
+              }`}
             >
-              <Send size={18} /> Apply Now
+              {hasApplied ? (
+                <>
+                  <CheckCircle size={18} /> Applied
+                </>
+              ) : (
+                <>
+                  <Send size={18} /> Apply Now
+                </>
+              )}
             </button>
           )}
         </div>

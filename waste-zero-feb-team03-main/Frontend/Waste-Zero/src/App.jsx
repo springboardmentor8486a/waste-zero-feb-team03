@@ -7,11 +7,13 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/loginpage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import Opportunities from "./pages/Opportunities"; // New discovery page
+import Opportunities from "./pages/Opportunities"; 
 import CreateOpportunity from "./pages/CreateOpportunity";
 import EditOpportunity from "./pages/EditOpportunity";
 import VolunteerDashboard from "./pages/Dashboard/VolunteerDashboard";
 import NGODashboard from "./pages/Dashboard/NGODashboard";
+// 1. ADD THIS IMPORT
+import OpportunityApplicants from "./pages/OpportunityApplicants"; 
 
 // Component Imports
 import ProtectedRoute from "./components/auth/ProtectedRoute";
@@ -27,7 +29,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             
-            {/* Discovery Route (Accessible by both roles) */}
+            {/* Discovery Route */}
             <Route path="/opportunities" element={<Opportunities />} />
 
             {/* Common Protected Routes */}
@@ -56,6 +58,16 @@ function App() {
               element={
                 <ProtectedRoute role="ngo">
                   <NGODashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* 2. ADD THE APPLICANTS ROUTE HERE (NGO ONLY) */}
+            <Route
+              path="/opportunities/:id/applicants"
+              element={
+                <ProtectedRoute role="ngo">
+                  <OpportunityApplicants />
                 </ProtectedRoute>
               }
             />

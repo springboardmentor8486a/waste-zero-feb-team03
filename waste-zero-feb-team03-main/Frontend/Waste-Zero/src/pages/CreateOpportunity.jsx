@@ -78,10 +78,6 @@ const CreateOpportunity = () => {
                 </li>
               </ul>
               
-              <div className="mt-20 p-6 bg-emerald-600 rounded-2xl text-white">
-                <p className="text-xs font-bold uppercase mb-2 opacity-80">NGO Note</p>
-                <p className="text-sm font-medium leading-relaxed">Your opportunity will be visible to all Volunteers in the Nagpur region.</p>
-              </div>
             </div>
 
             {/* Right Form Side */}

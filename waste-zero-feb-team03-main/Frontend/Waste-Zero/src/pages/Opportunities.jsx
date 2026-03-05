@@ -27,8 +27,8 @@ const Opportunities = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">All Opportunities</h2>
-          <p className="text-gray-600 dark:text-gray-400">Browse and discover waste management tasks near you.</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">All Opportunities listed by you</h2>
+          <p className="text-gray-600 dark:text-gray-400">Manage the Opportunities</p>
         </div>
 
         {loading ? (
