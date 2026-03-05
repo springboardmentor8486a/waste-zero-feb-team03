@@ -6,7 +6,7 @@ const opportunitySchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
-      index: true,
+      index: true, // Optimized for "My Opportunities" dashboard
     },
 
     title: {
@@ -33,11 +33,10 @@ const opportunitySchema = new mongoose.Schema(
     location: {
       type: String,
       required: [true, "Location is required"],
-      index: true,
+      index: true, // Optimized for filtering by location
     },
 
     // --- MILESTONE 2: APPLICANTS ARRAY ---
-    // This stores the IDs of volunteers who clicked "Apply"
     applicants: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -47,12 +46,16 @@ const opportunitySchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["open", "closed", "in-progress"],
+      enum: ["open", "closed", "in-progress"], // Matches Backend Checklist
       default: "open",
-      index: true,
+      lowercase: true, // Ensures "Open" and "open" are treated the same
+      index: true, // Optimized for filtering by status
     },
   },
   { timestamps: true }
 );
+
+// Optional: Compound index for NGOs searching their own posts by status
+opportunitySchema.index({ ngo_id: 1, status: 1 });
 
 export default mongoose.model("Opportunity", opportunitySchema);
