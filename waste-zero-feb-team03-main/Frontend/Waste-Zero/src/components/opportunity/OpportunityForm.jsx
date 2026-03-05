@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, Send } from 'lucide-react';
 
-// Added buttonText prop with a default value of "Post Opportunity"
 const OpportunityForm = ({ onSubmit, isLoading, initialData = {}, buttonText = "Post Opportunity" }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -9,10 +8,9 @@ const OpportunityForm = ({ onSubmit, isLoading, initialData = {}, buttonText = "
     required_skills: [],
     duration: '',
     location: '',
-    status: 'open'
+    status: 'open' 
   });
 
-  // Sync form state when initialData arrives from the API
   useEffect(() => {
     if (initialData && Object.keys(initialData).length > 0) {
       setFormData({
@@ -66,6 +64,21 @@ const OpportunityForm = ({ onSubmit, isLoading, initialData = {}, buttonText = "
           <label className={labelStyle}>Duration</label>
           <input name="duration" className={inputStyle} value={formData.duration} onChange={handleChange} required />
         </div>
+
+        {/* --- STATUS DROPDOWN ADDED --- */}
+        <div>
+          <label className={labelStyle}>Project Status</label>
+          <select 
+            name="status" 
+            className={inputStyle} 
+            value={formData.status} 
+            onChange={handleChange}
+          >
+            <option value="open">🟢 OPEN</option>
+            <option value="closed">🔴 CLOSED</option>
+          </select>
+        </div>
+
         <div className="md:col-span-2">
           <label className={labelStyle}>Required Skills (Comma separated)</label>
           <input name="required_skills" className={inputStyle} value={formData.required_skills.join(', ')} onChange={handleSkillChange} />
@@ -78,7 +91,6 @@ const OpportunityForm = ({ onSubmit, isLoading, initialData = {}, buttonText = "
         className="w-full md:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all disabled:opacity-50"
       >
         {isLoading ? <Loader2 className="animate-spin" /> : <Send size={18} />}
-        {/* Dynamic button text logic: uses the prop if provided, else defaults to "Post Opportunity" */}
         {isLoading ? "Saving..." : buttonText}
       </button>
     </form>
