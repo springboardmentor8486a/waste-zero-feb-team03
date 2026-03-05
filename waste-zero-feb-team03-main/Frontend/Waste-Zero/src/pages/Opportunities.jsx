@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-// Import useAuth to access the user's role
-import { useAuth } from "../context/AuthContext"; 
+import { useAuth } from "../context/AuthContext"; // Import useAuth
 import { getAllOpportunities } from "../services/opportunityService"; 
 import OpportunityCard from "../components/opportunity/OpportunityCard";
 import DashboardLayout from "../components/DashboardLayout";
@@ -8,9 +7,7 @@ import DashboardLayout from "../components/DashboardLayout";
 const Opportunities = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  
-  // Destructure the user from your AuthContext
-  const { user } = useAuth(); 
+  const { user } = useAuth(); // Access user role
 
   const fetchData = async () => {
     try {
@@ -27,19 +24,16 @@ const Opportunities = () => {
     fetchData();
   }, []);
 
-  // Determine if the user is a volunteer
   const isVolunteer = user?.role?.toLowerCase() === "volunteer";
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          {/* Conditional Heading */}
+          {/* Conditional Heading for Volunteer Dashboard */}
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {isVolunteer ? "Opportunities for You" : "All Opportunities listed by you"}
           </h2>
-          
-          {/* Conditional Subheading */}
           <p className="text-gray-600 dark:text-gray-400">
             {isVolunteer ? "Find and apply for new tasks near you" : "Manage the Opportunities"}
           </p>

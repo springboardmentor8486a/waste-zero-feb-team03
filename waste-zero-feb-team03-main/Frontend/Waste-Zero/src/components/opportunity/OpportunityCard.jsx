@@ -1,11 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { MapPin, Clock, Edit, Trash2, Users, Send, CheckCircle } from "lucide-react"; // Added CheckCircle
+import { MapPin, Clock, Edit, Trash2, Users, Send, CheckCircle, Lock } from "lucide-react"; 
 import api from "../../services/api";
 
 const OpportunityCard = ({ opportunity, onDelete }) => {
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  // Normalize status to lowercase to avoid matching errors
+  const status = opportunity.status?.toLowerCase() || 'open';
+  const isClosed = status === 'closed';
 
   // NGO Ownership check
   const isOwner = user?.role === "ngo" && (
@@ -13,17 +17,17 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
     user?._id === (opportunity?.ngo_id?._id || opportunity?.ngo_id)
   );
 
-  // NEW: Check if the current volunteer has already applied
+  // Check if current volunteer has already applied
   const hasApplied = opportunity.applicants?.some(applicantId => {
-    const idToCheck = applicantId._id || applicantId; // Handle populated vs non-populated IDs
+    const idToCheck = applicantId._id || applicantId; 
     return idToCheck === (user?.id || user?._id);
   });
 
   const handleApply = async () => {
+    if (isClosed) return; // Block application if closed
     try {
       await api.post(`/opportunities/${opportunity._id}/apply`);
       alert("Application submitted successfully!");
-      // Optional: Refresh the page or trigger a re-fetch to update the UI state
       window.location.reload(); 
     } catch (err) {
       alert(err.response?.data?.message || "Error applying for opportunity");
@@ -38,12 +42,13 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
             <h3 className="font-bold text-xl text-gray-900 dark:text-white">
               {opportunity.title}
             </h3>
+            {/* Dynamic Status Badge */}
             <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-              opportunity.status === 'open' 
+              status === 'open' 
                 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
-                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
             }`}>
-              {opportunity.status || 'open'}
+              {status}
             </span>
           </div>
 
@@ -59,16 +64,6 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
               <Clock size={14} className="text-emerald-600" /> {opportunity.duration}
             </span>
           </div>
-
-          {opportunity.required_skills && (
-            <div className="flex gap-2 mt-4">
-              {opportunity.required_skills.map((skill, index) => (
-                <span key={index} className="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-medium">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -95,20 +90,24 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
             </>
           )}
 
-          {/* VOLUNTEER ACTION: Conditional Rendering for Button State */}
+          {/* VOLUNTEER ACTION: Smart Button Logic */}
           {user?.role === "volunteer" && (
             <button 
               onClick={handleApply}
-              disabled={hasApplied}
+              disabled={hasApplied || isClosed}
               className={`px-6 py-2 rounded-lg flex items-center gap-2 font-bold transition-all ${
-                hasApplied 
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-700 dark:border-gray-600" 
+                (hasApplied || isClosed)
+                  ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 dark:bg-gray-700" 
                   : "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md hover:shadow-lg"
               }`}
             >
               {hasApplied ? (
                 <>
                   <CheckCircle size={18} /> Applied
+                </>
+              ) : isClosed ? (
+                <>
+                  <Lock size={18} /> Closed
                 </>
               ) : (
                 <>
