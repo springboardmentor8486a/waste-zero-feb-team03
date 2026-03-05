@@ -2,16 +2,14 @@ import mongoose from "mongoose";
 import Opportunity from "../models/Opportunity.js";
 
 /* =====================================
-   CREATE OPPORTUNITY
+   1. CREATE OPPORTUNITY
 ===================================== */
 export const createOpportunity = async (req, res, next) => {
   try {
     const { title, description, required_skills, duration, location } = req.body;
 
     if (!title || !description || !duration || !location) {
-      return res.status(400).json({
-        message: "All required fields must be provided",
-      });
+      return res.status(400).json({ message: "All required fields must be provided" });
     }
 
     const opportunity = await Opportunity.create({
@@ -21,7 +19,8 @@ export const createOpportunity = async (req, res, next) => {
       required_skills: required_skills || [],
       duration,
       location,
-      applicants: [] // Initialize empty applicants array
+      status: 'open',
+      applicants: []
     });
 
     res.status(201).json(opportunity);
@@ -31,28 +30,16 @@ export const createOpportunity = async (req, res, next) => {
 };
 
 /* =====================================
-   GET ALL OPPORTUNITIES
+   2. GET ALL OPPORTUNITIES (Volunteer View)
 ===================================== */
 export const getAllOpportunities = async (req, res, next) => {
   try {
     const { skill, location, status } = req.query;
     const filter = {};
 
-    if (!req.user) {
-      filter.status = "open";
-    }
-
-    if (skill) {
-      filter.required_skills = { $in: [skill] };
-    }
-
-    if (location) {
-      filter.location = location;
-    }
-
-    if (status) {
-      filter.status = status;
-    }
+    if (skill) filter.required_skills = { $in: [skill] };
+    if (location) filter.location = location;
+    if (status) filter.status = status;
 
     const opportunities = await Opportunity.find(filter)
       .populate("ngo_id", "name email location")
@@ -65,25 +52,16 @@ export const getAllOpportunities = async (req, res, next) => {
 };
 
 /* =====================================
-   GET SINGLE OPPORTUNITY
+   3. GET SINGLE OPPORTUNITY
 ===================================== */
 export const getOpportunityById = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
-
-    const opportunity = await Opportunity.findById(id).populate(
-      "ngo_id",
-      "name email location"
-    );
-
-    if (!opportunity) {
-      return res.status(404).json({ message: "Opportunity not found" });
-    }
-
+    const opportunity = await Opportunity.findById(id).populate("ngo_id", "name email location");
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
     res.json(opportunity);
   } catch (error) {
     next(error);
@@ -91,7 +69,7 @@ export const getOpportunityById = async (req, res, next) => {
 };
 
 /* =====================================
-   GET MY OPPORTUNITIES (NGO Side)
+   4. GET MY OPPORTUNITIES (NGO Dashboard)
 ===================================== */
 export const getMyOpportunities = async (req, res, next) => {
   try {
@@ -106,35 +84,23 @@ export const getMyOpportunities = async (req, res, next) => {
 };
 
 /* =====================================
-   UPDATE OPPORTUNITY
+   5. UPDATE OPPORTUNITY
 ===================================== */
 export const updateOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
     const opportunity = await Opportunity.findById(id);
 
-    if (!opportunity) {
-      return res.status(404).json({ message: "Opportunity not found" });
-    }
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
 
     if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        message: "You can only update your own opportunities",
-      });
+      return res.status(403).json({ message: "Unauthorized to update" });
     }
 
-    const allowedUpdates = [
-      "title",
-      "description",
-      "required_skills",
-      "duration",
-      "location",
-      "status",
-    ];
-
+    const allowedUpdates = ["title", "description", "required_skills", "duration", "location", "status"];
     allowedUpdates.forEach((field) => {
       if (req.body[field] !== undefined) {
-        opportunity[field] = req.body[field];
+        opportunity[field] = field === 'status' ? req.body[field].toLowerCase() : req.body[field];
       }
     });
 
@@ -146,21 +112,17 @@ export const updateOpportunity = async (req, res, next) => {
 };
 
 /* =====================================
-   DELETE OPPORTUNITY
+   6. DELETE OPPORTUNITY
 ===================================== */
 export const deleteOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
     const opportunity = await Opportunity.findById(id);
 
-    if (!opportunity) {
-      return res.status(404).json({ message: "Opportunity not found" });
-    }
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
 
     if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({
-        message: "You can only delete your own opportunities",
-      });
+      return res.status(403).json({ message: "Unauthorized to delete" });
     }
 
     await opportunity.deleteOne();
@@ -170,61 +132,38 @@ export const deleteOpportunity = async (req, res, next) => {
   }
 };
 
-/* ============================================================
-   NEW MILESTONE 2 FUNCTIONS: APPLY & VIEW APPLICANTS
-============================================================ */
-
-// @desc    Apply for an opportunity
-// @route   POST /api/opportunities/:id/apply
+/* =====================================
+   7. APPLY TO OPPORTUNITY
+===================================== */
 export const applyToOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid Opportunity ID" });
-    }
-
     const opportunity = await Opportunity.findById(id);
 
-    if (!opportunity) {
-      return res.status(404).json({ message: "Opportunity not found" });
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
+    if (opportunity.status === "closed") {
+      return res.status(400).json({ message: "This opportunity is closed." });
     }
-
-    // Prevent duplicate applications
     if (opportunity.applicants.includes(req.user._id)) {
-      return res.status(400).json({ message: "You have already applied for this task" });
+      return res.status(400).json({ message: "Already applied" });
     }
 
     opportunity.applicants.push(req.user._id);
     await opportunity.save();
-
-    res.status(200).json({ message: "Application submitted successfully!" });
+    res.status(200).json({ message: "Applied successfully!" });
   } catch (error) {
     next(error);
   }
 };
 
-// @desc    Get all applicants for an opportunity
-// @route   GET /api/opportunities/:id/applicants
+/* =====================================
+   8. GET APPLICANTS
+===================================== */
 export const getOpportunityApplicants = async (req, res, next) => {
   try {
     const { id } = req.params;
-
-    // Populate user details so the NGO sees names, not just IDs
-    const opportunity = await Opportunity.findById(id).populate(
-      "applicants", 
-      "name email profile_picture"
-    );
-
-    if (!opportunity) {
-      return res.status(404).json({ message: "Opportunity not found" });
-    }
-
-    // Ownership check: Only the NGO that created it can see applicants
-    if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Unauthorized access to applicants list" });
-    }
-
+    const opportunity = await Opportunity.findById(id).populate("applicants", "name email");
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
     res.json(opportunity.applicants);
   } catch (error) {
     next(error);
