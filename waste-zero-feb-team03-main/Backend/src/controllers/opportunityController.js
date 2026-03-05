@@ -6,8 +6,7 @@ import Opportunity from "../models/Opportunity.js";
 ===================================== */
 export const createOpportunity = async (req, res, next) => {
   try {
-    const { title, description, required_skills, duration, location } =
-      req.body;
+    const { title, description, required_skills, duration, location } = req.body;
 
     if (!title || !description || !duration || !location) {
       return res.status(400).json({
@@ -22,6 +21,7 @@ export const createOpportunity = async (req, res, next) => {
       required_skills: required_skills || [],
       duration,
       location,
+      applicants: [] // Initialize empty applicants array
     });
 
     res.status(201).json(opportunity);
@@ -36,10 +36,8 @@ export const createOpportunity = async (req, res, next) => {
 export const getAllOpportunities = async (req, res, next) => {
   try {
     const { skill, location, status } = req.query;
-
     const filter = {};
 
-    // Public sees only open
     if (!req.user) {
       filter.status = "open";
     }
@@ -93,7 +91,7 @@ export const getOpportunityById = async (req, res, next) => {
 };
 
 /* =====================================
-   GET MY OPPORTUNITIES
+   GET MY OPPORTUNITIES (NGO Side)
 ===================================== */
 export const getMyOpportunities = async (req, res, next) => {
   try {
@@ -113,14 +111,12 @@ export const getMyOpportunities = async (req, res, next) => {
 export const updateOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const opportunity = await Opportunity.findById(id);
 
     if (!opportunity) {
       return res.status(404).json({ message: "Opportunity not found" });
     }
 
-    // Ownership check
     if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
       return res.status(403).json({
         message: "You can only update your own opportunities",
@@ -143,7 +139,6 @@ export const updateOpportunity = async (req, res, next) => {
     });
 
     const updated = await opportunity.save();
-
     res.json(updated);
   } catch (error) {
     next(error);
@@ -156,7 +151,6 @@ export const updateOpportunity = async (req, res, next) => {
 export const deleteOpportunity = async (req, res, next) => {
   try {
     const { id } = req.params;
-
     const opportunity = await Opportunity.findById(id);
 
     if (!opportunity) {
@@ -170,8 +164,68 @@ export const deleteOpportunity = async (req, res, next) => {
     }
 
     await opportunity.deleteOne();
-
     res.json({ message: "Opportunity deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* ============================================================
+   NEW MILESTONE 2 FUNCTIONS: APPLY & VIEW APPLICANTS
+============================================================ */
+
+// @desc    Apply for an opportunity
+// @route   POST /api/opportunities/:id/apply
+export const applyToOpportunity = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid Opportunity ID" });
+    }
+
+    const opportunity = await Opportunity.findById(id);
+
+    if (!opportunity) {
+      return res.status(404).json({ message: "Opportunity not found" });
+    }
+
+    // Prevent duplicate applications
+    if (opportunity.applicants.includes(req.user._id)) {
+      return res.status(400).json({ message: "You have already applied for this task" });
+    }
+
+    opportunity.applicants.push(req.user._id);
+    await opportunity.save();
+
+    res.status(200).json({ message: "Application submitted successfully!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Get all applicants for an opportunity
+// @route   GET /api/opportunities/:id/applicants
+export const getOpportunityApplicants = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    // Populate user details so the NGO sees names, not just IDs
+    const opportunity = await Opportunity.findById(id).populate(
+      "applicants", 
+      "name email profile_picture"
+    );
+
+    if (!opportunity) {
+      return res.status(404).json({ message: "Opportunity not found" });
+    }
+
+    // Ownership check: Only the NGO that created it can see applicants
+    if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized access to applicants list" });
+    }
+
+    res.json(opportunity.applicants);
   } catch (error) {
     next(error);
   }
