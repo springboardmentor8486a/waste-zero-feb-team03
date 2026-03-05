@@ -11,7 +11,7 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
   const status = opportunity.status?.toLowerCase() || 'open';
   const isClosed = status === 'closed';
 
-  // NGO Ownership check
+  // NGO Ownership check: Verify if the current user is the creator
   const isOwner = user?.role === "ngo" && (
     user?.id === (opportunity?.ngo_id?._id || opportunity?.ngo_id) ||
     user?._id === (opportunity?.ngo_id?._id || opportunity?.ngo_id)
@@ -22,6 +22,16 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
     const idToCheck = applicantId._id || applicantId; 
     return idToCheck === (user?.id || user?._id);
   });
+
+  // NEW: Confirmation Modal Logic (Requirement #4)
+  const handleDeleteClick = () => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete "${opportunity.title}"? This action cannot be undone.`
+    );
+    if (confirmDelete) {
+      onDelete(opportunity._id);
+    }
+  };
 
   const handleApply = async () => {
     if (isClosed) return; // Block application if closed
@@ -81,8 +91,9 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
               >
                 <Edit size={18} /> Edit
               </button>
+              {/* Updated Delete Button with Confirmation Modal */}
               <button 
-                onClick={() => onDelete(opportunity._id)}
+                onClick={handleDeleteClick}
                 className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-1 font-bold text-sm"
               >
                 <Trash2 size={18} /> Delete
@@ -102,17 +113,11 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
               }`}
             >
               {hasApplied ? (
-                <>
-                  <CheckCircle size={18} /> Applied
-                </>
+                <><CheckCircle size={18} /> Applied</>
               ) : isClosed ? (
-                <>
-                  <Lock size={18} /> Closed
-                </>
+                <><Lock size={18} /> Closed</>
               ) : (
-                <>
-                  <Send size={18} /> Apply Now
-                </>
+                <><Send size={18} /> Apply Now</>
               )}
             </button>
           )}
