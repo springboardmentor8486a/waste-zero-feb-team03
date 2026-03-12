@@ -1,59 +1,43 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
-import { createServer } from "http"; // 1. Import http server
-import { Server } from "socket.io"; // 2. Import Socket.io
-import connectDB from "./config/db.js";
-import authRoutes from "./routes/authRoutes.js";
-import userRoutes from "./routes/userRoutes.js";
-import opportunityRoutes from "./routes/opportunityRoutes.js";
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import http from 'http';
+
+import connectDB from './config/db.js';
+import { initSocket } from './socket/socketServer.js';
+
+import authRoutes from './routes/authRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import opportunityRoutes from './routes/opportunityRoutes.js';
+
+import matchRoutes from './routes/matchRoutes.js';
+import messageRoutes from './routes/messageRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
+
+import { errorHandler } from './middleware/errorHandler.js';
+
 
 dotenv.config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+initSocket(server);
 
-// Middleware
-app.use(cors());
+app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
 app.use(express.json());
 
-// Socket.io Setup
-const httpServer = createServer(app); // 3. Wrap Express app
-const io = new Server(httpServer, {
-  cors: {
-    origin: "http://localhost:5173", // Your Vite Frontend URL
-    methods: ["GET", "POST"],
-    credentials: true
-  }
-});
+app.use('/auth', authRoutes);
+app.use('/users', userRoutes);
+app.use('/opportunities', opportunityRoutes);
 
-// Real-time Logic (Milestone 3 Infrastructure)
-io.on("connection", (socket) => {
-  console.log(`⚡ User Connected: ${socket.id}`);
+app.use('/matches', matchRoutes);
+app.use('/messages', messageRoutes);
+app.use('/notifications', notificationRoutes);
 
-  // Test event for Ping-Pong
-  socket.on("ping_test", (data) => {
-    console.log("📩 Ping received:", data.message);
-    socket.emit("pong_test", { message: "Hello from Backend!" });
-  });
+app.get('/', (req, res) => res.send('Backend is running...'));
 
-  socket.on("disconnect", () => {
-    console.log("❌ User Disconnected");
-  });
-});
-
-// Routes
-app.use("/auth", authRoutes); 
-app.use("/users", userRoutes);
-app.use("/opportunities", opportunityRoutes);
-
-app.get("/", (req, res) => {
-  res.send("Backend is running with Socket.io...");
-});
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-
-// 4. IMPORTANT: Listen on httpServer, not app
-httpServer.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-});
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
