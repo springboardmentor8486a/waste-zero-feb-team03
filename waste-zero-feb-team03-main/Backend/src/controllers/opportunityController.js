@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/Opportunity.js";
+import { notifyMatchedVolunteers } from "./matchController.js"; // ← Milestone 3 addition
 
 /* =====================================
    1. CREATE OPPORTUNITY
@@ -19,9 +20,12 @@ export const createOpportunity = async (req, res, next) => {
       required_skills: required_skills || [],
       duration,
       location,
-      status: 'open',
-      applicants: []
+      status: "open",
+      applicants: [],
     });
+
+    // notify matching volunteers in the background 
+    notifyMatchedVolunteers(opportunity.toObject());
 
     res.status(201).json(opportunity);
   } catch (error) {
@@ -73,10 +77,9 @@ export const getOpportunityById = async (req, res, next) => {
 ===================================== */
 export const getMyOpportunities = async (req, res, next) => {
   try {
-    const opportunities = await Opportunity.find({
-      ngo_id: req.user._id,
-    }).sort({ createdAt: -1 });
-
+    const opportunities = await Opportunity.find({ ngo_id: req.user._id }).sort({
+      createdAt: -1,
+    });
     res.json(opportunities);
   } catch (error) {
     next(error);
@@ -100,11 +103,21 @@ export const updateOpportunity = async (req, res, next) => {
     const allowedUpdates = ["title", "description", "required_skills", "duration", "location", "status"];
     allowedUpdates.forEach((field) => {
       if (req.body[field] !== undefined) {
-        opportunity[field] = field === 'status' ? req.body[field].toLowerCase() : req.body[field];
+        opportunity[field] =
+          field === "status" ? req.body[field].toLowerCase() : req.body[field];
       }
     });
 
     const updated = await opportunity.save();
+
+    // re-notify if skills/location changed 
+    if (
+      req.body.required_skills !== undefined ||
+      req.body.location !== undefined
+    ) {
+      notifyMatchedVolunteers(updated.toObject());
+    }
+
     res.json(updated);
   } catch (error) {
     next(error);
