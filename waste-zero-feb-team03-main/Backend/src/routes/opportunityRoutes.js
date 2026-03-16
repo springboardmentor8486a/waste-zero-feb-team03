@@ -6,8 +6,9 @@ import {
   updateOpportunity,
   deleteOpportunity,
   getMyOpportunities,
-  applyToOpportunity, // Add this import
-  getOpportunityApplicants // Add this import
+  applyToOpportunity,
+  getOpportunityApplicants,
+  updateApplicationStatus
 } from "../controllers/opportunityController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -27,6 +28,9 @@ router.post("/:id/apply", protect, authorizeRoles("volunteer"), applyToOpportuni
 
 // 2. NGO views applicants for their specific opportunity
 router.get("/:id/applicants", protect, authorizeRoles("NGO"), getOpportunityApplicants);
+
+// 3. NGO accepts or rejects an applicant
+router.put("/:id/applicants/:volunteerId/status", protect, authorizeRoles("NGO"), updateApplicationStatus);
 
 // Public Routes
 router.get("/", getAllOpportunities);

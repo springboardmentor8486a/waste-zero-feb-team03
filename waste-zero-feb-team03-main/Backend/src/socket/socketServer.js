@@ -1,19 +1,13 @@
 import { Server } from 'socket.io';
 import jwt from 'jsonwebtoken';
 
-/** @type {Server} */
 let io = null;
-
-/**
- * userId (string) → socketId (string)
- * Used to target a specific user for real-time events.
- */
 const onlineUsers = new Map();
 
 export function initSocket(httpServer) {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || '*',
+      origin: process.env.CLIENT_URL || 'http://localhost:5173',
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -21,7 +15,6 @@ export function initSocket(httpServer) {
     pingInterval: 25000,
   });
 
-  // JWT auth on every socket connection 
   io.use((socket, next) => {
     try {
       const token =
@@ -31,20 +24,18 @@ export function initSocket(httpServer) {
       if (!token) return next(new Error('No token provided'));
 
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      socket.user = decoded; // { id, role, ... }
+      socket.user = decoded;
       next();
     } catch {
       next(new Error('Invalid or expired token'));
     }
   });
 
-  //  Connection 
   io.on('connection', (socket) => {
     const userId = socket.user.id;
     onlineUsers.set(userId, socket.id);
     console.log(`[Socket] connected: ${userId}`);
 
-    // Typing indicators 
     socket.on('typing', ({ receiverId }) => {
       const sid = onlineUsers.get(String(receiverId));
       if (sid) io.to(sid).emit('typing', { senderId: userId });
@@ -55,13 +46,11 @@ export function initSocket(httpServer) {
       if (sid) io.to(sid).emit('stopTyping', { senderId: userId });
     });
 
-    // Read receipt 
     socket.on('markRead', ({ senderId }) => {
       const sid = onlineUsers.get(String(senderId));
       if (sid) io.to(sid).emit('messagesRead', { readBy: userId });
     });
 
-    // Disconnect 
     socket.on('disconnect', () => {
       onlineUsers.delete(userId);
       console.log(`[Socket] disconnected: ${userId}`);
@@ -72,7 +61,7 @@ export function initSocket(httpServer) {
 }
 
 export const getIO = () => {
-  if (!io) throw new Error('Socket not initialised — call initSocket() first');
+  if (!io) throw new Error('Socket not initialised');
   return io;
 };
 

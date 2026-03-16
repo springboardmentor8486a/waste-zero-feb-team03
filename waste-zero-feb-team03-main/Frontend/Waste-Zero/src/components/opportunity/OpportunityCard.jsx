@@ -12,10 +12,11 @@ const OpportunityCard = ({ opportunity, onDelete }) => {
   const isClosed = status === 'closed';
 
   // NGO Ownership check: Verify if the current user is the creator
-  const isOwner = user?.role === "ngo" && (
-    user?.id === (opportunity?.ngo_id?._id || opportunity?.ngo_id) ||
-    user?._id === (opportunity?.ngo_id?._id || opportunity?.ngo_id)
-  );
+  
+  const userRole = user?.role?.toLowerCase();
+  const userId   = (user?._id || user?.id)?.toString();
+  const ngoId    = (opportunity?.ngo_id?._id || opportunity?.ngo_id)?.toString();
+  const isOwner  = userRole === "ngo" && !!userId && !!ngoId && userId === ngoId;
 
   // Check if current volunteer has already applied
   const hasApplied = opportunity.applicants?.some(applicantId => {

@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/Opportunity.js";
+import Application from "../models/Application.js";
 import { notifyMatchedVolunteers } from "./matchController.js"; // ← Milestone 3 addition
 
 /* =====================================
@@ -157,12 +158,30 @@ export const applyToOpportunity = async (req, res, next) => {
     if (opportunity.status === "closed") {
       return res.status(400).json({ message: "This opportunity is closed." });
     }
-    if (opportunity.applicants.includes(req.user._id)) {
+
+    // Check if application already exists using Application model
+    const existingApplication = await Application.findOne({
+      opportunity_id: id,
+      volunteer_id: req.user._id
+    });
+
+    if (existingApplication || opportunity.applicants.includes(req.user._id)) {
       return res.status(400).json({ message: "Already applied" });
     }
 
+    // Create the Application record
+    const application = new Application({
+      opportunity_id: id,
+      volunteer_id: req.user._id,
+      status: 'pending' // default is pending in the schema anyway
+    });
+
+    await application.save();
+
+    // Still maintain the array for easier querying if needed, or backward compatibility
     opportunity.applicants.push(req.user._id);
     await opportunity.save();
+
     res.status(200).json({ message: "Applied successfully!" });
   } catch (error) {
     next(error);
@@ -175,9 +194,69 @@ export const applyToOpportunity = async (req, res, next) => {
 export const getOpportunityApplicants = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const opportunity = await Opportunity.findById(id).populate("applicants", "name email");
+    const opportunity = await Opportunity.findById(id);
     if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
-    res.json(opportunity.applicants);
+
+    // Ensure only the NGO who created it can view applicants
+    if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized to view applicants" });
+    }
+
+    // Fetch applications and populate volunteer info
+    const applications = await Application.find({ opportunity_id: id })
+      .populate("volunteer_id", "name email");
+
+    // Map to an array of objects that includes both the user info and the application status
+    const formattedApplicants = applications.map(app => {
+      // It's possible old records might not have an Application doc, but standardizing forward
+      return {
+        _id: app.volunteer_id._id,
+        name: app.volunteer_id.name,
+        email: app.volunteer_id.email,
+        status: app.status,
+        application_id: app._id,
+        appliedAt: app.createdAt
+      };
+    });
+
+    res.json(formattedApplicants);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* =====================================
+   9. UPDATE APPLICATION STATUS
+===================================== */
+export const updateApplicationStatus = async (req, res, next) => {
+  try {
+    const { id, volunteerId } = req.params;
+    const { status } = req.body; // should be 'accepted' or 'rejected'
+
+    if (!['accepted', 'rejected', 'pending'].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const opportunity = await Opportunity.findById(id);
+    if (!opportunity) return res.status(404).json({ message: "Opportunity not found" });
+
+    if (opportunity.ngo_id.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Unauthorized to update application status" });
+    }
+
+    const application = await Application.findOne({
+      opportunity_id: id,
+      volunteer_id: volunteerId
+    });
+
+    if (!application) {
+      return res.status(404).json({ message: "Application not found" });
+    }
+
+    application.status = status;
+    await application.save();
+
+    res.json({ message: `Application ${status}`, application });
   } catch (error) {
     next(error);
   }
