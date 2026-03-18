@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import Opportunity from "../models/Opportunity.js";
 import Application from "../models/Application.js";
+import Notification from "../models/Notification.js";
 import { notifyMatchedVolunteers } from "./matchController.js"; // ← Milestone 3 addition
+import { emitToUser } from "../socket/socketServer.js";
 
 /* =====================================
    1. CREATE OPPORTUNITY
@@ -39,8 +41,15 @@ export const createOpportunity = async (req, res, next) => {
 ===================================== */
 export const getAllOpportunities = async (req, res, next) => {
   try {
-    const { skill, location, status } = req.query;
+    const { skill, location, status, search } = req.query;
     const filter = {};
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
 
     if (skill) filter.required_skills = { $in: [skill] };
     if (location) filter.location = location;
@@ -78,7 +87,17 @@ export const getOpportunityById = async (req, res, next) => {
 ===================================== */
 export const getMyOpportunities = async (req, res, next) => {
   try {
-    const opportunities = await Opportunity.find({ ngo_id: req.user._id }).sort({
+    const { search } = req.query;
+    const filter = { ngo_id: req.user._id };
+
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const opportunities = await Opportunity.find(filter).sort({
       createdAt: -1,
     });
     res.json(opportunities);
@@ -255,6 +274,27 @@ export const updateApplicationStatus = async (req, res, next) => {
 
     application.status = status;
     await application.save();
+
+    // Create Notification and Emit
+    let notifMessage = `Your application for "${opportunity.title}" was ${status}.`;
+    if (status === 'accepted') {
+      notifMessage = `🎉 Congratulations! Your application for "${opportunity.title}" was accepted.`;
+    } else if (status === 'rejected') {
+      notifMessage = `Your application for "${opportunity.title}" was declined. Keep exploring other opportunities!`;
+    }
+
+    try {
+      const notification = await Notification.create({
+        user_id: volunteerId,
+        type: 'applicationUpdate',
+        message: notifMessage,
+        ref_id: opportunity._id,
+        ref_type: 'Opportunity'
+      });
+      emitToUser(volunteerId.toString(), 'notification', notification);
+    } catch (notifErr) {
+      console.error("Failed to send notification:", notifErr);
+    }
 
     res.json({ message: `Application ${status}`, application });
   } catch (error) {

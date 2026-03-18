@@ -2,8 +2,9 @@ import mongoose from 'mongoose';
 import Message from '../models/Message.js';
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
+import Opportunity from '../models/Opportunity.js';
 import { emitToUser } from '../socket/socketServer.js';
-
+import { calculateMatchScore } from '../utils/matchingAlgorithm.js';
 /* =====================================
    POST /messages
 ===================================== */
@@ -20,10 +21,37 @@ export const sendMessage = async (req, res, next) => {
       return res.status(400).json({ message: 'Cannot send a message to yourself' });
     }
 
-    const receiver = await User.findById(receiver_id).select('_id name');
+    const receiver = await User.findById(receiver_id).select('_id name role skills location');
     if (!receiver) return res.status(404).json({ message: 'Receiver not found' });
 
+    if (req.user.role === receiver.role) {
+      return res.status(403).json({ message: 'Forbidden: Cannot chat with users of the same role' });
+    }
+
     const conversation_id = Message.buildConversationId(sender_id, receiver_id);
+
+    // Verify if conversation exists or users are matched
+    const existingMessage = await Message.findOne({ conversation_id }).lean();
+    if (!existingMessage) {
+      const isSenderVolunteer = req.user.role === 'volunteer';
+      const volunteer = isSenderVolunteer ? req.user : receiver;
+      const ngoId = isSenderVolunteer ? receiver._id : req.user._id;
+
+      const ngoOpportunities = await Opportunity.find({ ngo_id: ngoId, status: 'open' }).lean();
+
+      let isMatched = false;
+      for (const opp of ngoOpportunities) {
+        const { isEligible } = calculateMatchScore(volunteer, opp);
+        if (isEligible) {
+          isMatched = true;
+          break;
+        }
+      }
+
+      if (!isMatched) {
+        return res.status(403).json({ message: 'Forbidden: You are not matched with this user yet' });
+      }
+    }
 
     const message = await Message.create({
       sender_id,

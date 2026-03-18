@@ -1,17 +1,26 @@
 import { useAuth } from "../context/AuthContext";
-import { Bell, Settings } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Bell } from "lucide-react";
 import api from "../services/api";
 import { socket } from "../utils/socket";
-import { useNavigate } from "react-router-dom";
 
 export default function Topbar() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef();
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/opportunities?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Clear the top bar after search
+    }
+  };
 
   const fetchNotifications = async () => {
     try {
@@ -83,6 +92,7 @@ export default function Topbar() {
     if (!notification.read) await markAsRead(notification._id);
     if (notification.type === "newMessage") navigate("/chat/messages");
     else if (notification.type === "newMatch") navigate("/matches");
+    // Optionally handle other types here
     setOpen(false);
   };
 
@@ -95,11 +105,11 @@ export default function Topbar() {
 
   const timeAgo = (ts) => {
     const diff = Date.now() - new Date(ts).getTime();
-    const mins  = Math.floor(diff / 60000);
+    const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
-    const days  = Math.floor(diff / 86400000);
-    if (mins < 1)   return "just now";
-    if (mins < 60)  return `${mins}m ago`;
+    const days = Math.floor(diff / 86400000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return `${mins}m ago`;
     if (hours < 24) return `${hours}h ago`;
     return `${days}d ago`;
   };
@@ -109,10 +119,14 @@ export default function Topbar() {
 
       {/* Search */}
       <div className="flex-1 max-w-md">
-        <input
-          placeholder="Search pickups, opportunities..."
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-        />
+        <form onSubmit={handleSearchSubmit}>
+          <input
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search pickups, opportunities..."
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 text-sm bg-gray-50 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
+          />
+        </form>
       </div>
 
       <div className="flex items-center gap-6 ml-auto">
@@ -157,9 +171,8 @@ export default function Topbar() {
                     <button
                       key={n._id}
                       onClick={() => handleNotificationClick(n)}
-                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex gap-3 items-start ${
-                        !n.read ? "bg-emerald-50/50 dark:bg-emerald-900/10" : ""
-                      }`}
+                      className={`w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors flex gap-3 items-start ${!n.read ? "bg-emerald-50/50 dark:bg-emerald-900/10" : ""
+                        }`}
                     >
                       <span className="text-lg mt-0.5">{typeIcon[n.type] || "🔔"}</span>
                       <div className="flex-1 min-w-0">
@@ -182,11 +195,6 @@ export default function Topbar() {
             </div>
           )}
         </div>
-
-        {/* Settings */}
-        <button className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors text-gray-600 dark:text-gray-300">
-          <Settings size={20} />
-        </button>
 
         <div className="h-8 w-px bg-gray-200 dark:bg-gray-600" />
 

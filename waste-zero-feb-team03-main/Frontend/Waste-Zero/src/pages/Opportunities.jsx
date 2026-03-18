@@ -1,19 +1,25 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { getAllOpportunities } from "../services/opportunityService"; 
+import { Link, useSearchParams } from "react-router-dom";
+import { getAllOpportunities, getMyOpportunities } from "../services/opportunityService";
 import OpportunityCard from "../components/opportunity/OpportunityCard";
 import DashboardLayout from "../components/DashboardLayout";
-import { Search, Loader2 } from "lucide-react"; // Import icons for better UI
+import { Search, Loader2, XCircle } from "lucide-react"; // Import icons for better UI
 
 const Opportunities = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const [searchParams] = useSearchParams();
+  const search = searchParams.get("search");
+
+  const isVolunteer = user?.role?.toLowerCase() === "volunteer";
 
   const fetchData = async () => {
     try {
       setLoading(true); // Ensure loading state triggers on refresh
-      const res = await getAllOpportunities();
+      const fetchFunction = isVolunteer ? getAllOpportunities : getMyOpportunities;
+      const res = await fetchFunction(search ? { search } : {});
       setData(res.data);
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -23,10 +29,10 @@ const Opportunities = () => {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  const isVolunteer = user?.role?.toLowerCase() === "volunteer";
+    if (user) {
+      fetchData();
+    }
+  }, [search, user]);
 
   return (
     <DashboardLayout>
@@ -36,11 +42,23 @@ const Opportunities = () => {
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {isVolunteer ? "Opportunities for You" : "Manage Opportunities"}
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            {isVolunteer 
-              ? "Find and apply for new tasks near you" 
-              : "View, edit, or delete the opportunities you have posted"}
-          </p>
+          <div className="flex items-center justify-between">
+            <p className="text-gray-600 dark:text-gray-400">
+              {isVolunteer
+                ? "Find and apply for new tasks near you"
+                : "View, edit, or delete the opportunities you have posted"}
+            </p>
+            {search && (
+              <Link
+                to="/opportunities"
+                className="flex items-center gap-1.5 text-sm bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-3 py-1.5 rounded-full hover:bg-emerald-200 transition-colors"
+                title="Clear Search"
+              >
+                <span>Search: <strong>"{search}"</strong></span>
+                <XCircle size={14} />
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* Improved Loading State */}
@@ -59,8 +77,8 @@ const Opportunities = () => {
               No Opportunities Found
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-sm">
-              {isVolunteer 
-                ? "There are no active tasks at the moment. Please check back later!" 
+              {isVolunteer
+                ? "There are no active tasks at the moment. Please check back later!"
                 : "You haven't posted any opportunities yet. Start by creating one."}
             </p>
           </div>

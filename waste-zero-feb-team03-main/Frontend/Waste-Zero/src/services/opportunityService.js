@@ -16,8 +16,11 @@ API.interceptors.request.use((req) => {
 
 // --- BASIC OPPORTUNITY MANAGEMENT ---
 
-export const getAllOpportunities = () =>
-  API.get("/opportunities");
+export const getAllOpportunities = (params = {}) =>
+  API.get("/opportunities", { params });
+
+export const getMyOpportunities = (params = {}) =>
+  API.get("/opportunities/my", { params });
 
 export const getOpportunityById = (id) =>
   API.get(`/opportunities/${id}`);
@@ -37,7 +40,7 @@ export const deleteOpportunity = (id) =>
  * Sends a request for the logged-in volunteer to apply for a task
  * @param {string} id - The Opportunity ID (_id)
  */
-export const applyToOpportunity = (id) => 
+export const applyToOpportunity = (id) =>
   API.post(`/opportunities/${id}/apply`);
 
 /**
@@ -45,7 +48,7 @@ export const applyToOpportunity = (id) =>
  * Accessible only by the NGO who created the task
  * @param {string} id - The Opportunity ID (_id)
  */
-export const getOpportunityApplicants = (id) => 
+export const getOpportunityApplicants = (id) =>
   API.get(`/opportunities/${id}/applicants`);
 
 export default API;

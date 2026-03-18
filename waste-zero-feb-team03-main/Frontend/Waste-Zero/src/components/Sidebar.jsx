@@ -63,10 +63,10 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="w-64 bg-slate-900 text-white h-screen flex flex-col justify-between p-4 transition-colors duration-300 dark:bg-black border-r border-gray-800">
+    <div className="w-64 bg-slate-900 text-white h-screen flex flex-col p-4 transition-colors duration-300 dark:bg-black border-r border-gray-800">
 
       {/* Top Section */}
-      <div>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2">
         <div className="mb-8 px-4 flex items-center gap-2 text-emerald-500">
           <Leaf size={28} />
           <h1 className="text-2xl font-bold tracking-tight text-white">WasteZero</h1>
@@ -111,19 +111,8 @@ const Sidebar = () => {
       </div>
 
       {/* Bottom Section */}
-      <div className="space-y-4">
-        <button
-          onClick={() => {
-            logout();
-            navigate("/");
-          }}
-          className="w-full flex items-center justify-center gap-2 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-colors font-medium shadow-lg shadow-red-500/20"
-        >
-          <LogOut size={18} />
-          Sign Out
-        </button>
-
-        <div className="flex items-center justify-between px-2 pt-4 border-t border-gray-800">
+      <div className="shrink-0 mt-4 pt-4 border-t border-gray-800">
+        <div className="flex items-center justify-between px-2">
           <span className="text-sm text-gray-400">Theme</span>
           <button
             onClick={toggleTheme}

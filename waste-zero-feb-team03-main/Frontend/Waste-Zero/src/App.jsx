@@ -13,6 +13,7 @@ import LandingPage from "./pages/LandingPage";
 import Login from "./pages/loginpage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword"; // ← NEW
 import Opportunities from "./pages/Opportunities";
 import CreateOpportunity from "./pages/CreateOpportunity";
 import EditOpportunity from "./pages/EditOpportunity";
@@ -50,9 +51,9 @@ const SocketManager = () => {
       socket.off("connect");
       socket.off("connect_error");
     };
-  }, [user]); 
+  }, [user]);
 
-  return null; 
+  return null;
 };
 
 const AppContent = () => {
@@ -70,6 +71,7 @@ const AppContent = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/opportunities" element={<Opportunities />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
         {/* Shared protected */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

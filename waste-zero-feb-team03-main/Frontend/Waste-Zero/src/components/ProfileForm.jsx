@@ -34,8 +34,13 @@ export default function ProfileForm() {
     e.preventDefault();
     console.log("Form submitted");
 
+    const payload = { ...form };
+    if (typeof payload.skills === 'string') {
+      payload.skills = payload.skills.split(',').map(s => s.trim()).filter(Boolean);
+    }
+
     try {
-      await api.put("/users/me", form);
+      await api.put("/users/me", payload);
       alert("Profile updated successfully");
     } catch (err) {
       console.error("Update failed:", err);
@@ -90,8 +95,8 @@ export default function ProfileForm() {
         <label className="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Skills</label>
         <input
           className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all"
-          value={form.skills.join(', ')}
-          onChange={(e) => setForm({ ...form, skills: e.target.value.split(',').map(s => s.trim()).filter(Boolean) })}
+          value={typeof form.skills === 'string' ? form.skills : form.skills.join(', ')}
+          onChange={(e) => setForm({ ...form, skills: e.target.value })}
           placeholder="e.g., Recycling, Teamwork, Driving"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Separate skills with commas</p>
