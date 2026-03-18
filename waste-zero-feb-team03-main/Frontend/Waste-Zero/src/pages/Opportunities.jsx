@@ -1,52 +1,77 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useAuth } from "../context/AuthContext";
 import { Link, useSearchParams } from "react-router-dom";
 import { getAllOpportunities, getMyOpportunities } from "../services/opportunityService";
 import OpportunityCard from "../components/opportunity/OpportunityCard";
 import DashboardLayout from "../components/DashboardLayout";
-import { Search, Loader2, XCircle } from "lucide-react"; // Import icons for better UI
+import { Search, Loader2, XCircle } from "lucide-react";
+import api from "../services/api";
+import { socket } from "../utils/socket";
 
 const Opportunities = () => {
-  const [data, setData] = useState([]);
-  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const search = searchParams.get("search");
 
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [appStatuses, setAppStatuses] = useState({});
+
   const isVolunteer = user?.role?.toLowerCase() === "volunteer";
 
-  const fetchData = async () => {
+  const fetchAppStatuses = useCallback(async () => {
+    if (!isVolunteer) return;
     try {
-      setLoading(true); // Ensure loading state triggers on refresh
-      const fetchFunction = isVolunteer ? getAllOpportunities : getMyOpportunities;
-      const res = await fetchFunction(search ? { search } : {});
+      const res = await api.get("/applications/status");
+      const statuses = res.data.reduce((acc, app) => {
+        acc[app.opportunity._id] = app.status;
+        return acc;
+      }, {});
+      setAppStatuses(statuses);
+    } catch (err) {
+      console.error("Error fetching application statuses:", err);
+    }
+  }, [isVolunteer]);
+
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const serviceCall = isVolunteer ? getAllOpportunities : getMyOpportunities;
+      const res = await serviceCall();
       setData(res.data);
+      if (isVolunteer) {
+        await fetchAppStatuses();
+      }
     } catch (err) {
       console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [isVolunteer, fetchAppStatuses]);
 
   useEffect(() => {
-    if (user) {
-      fetchData();
-    }
-  }, [search, user]);
+    fetchData();
+  }, [fetchData]);
+
+  const filtered = data.filter((opp) =>
+    search
+      ? opp.title.toLowerCase().includes(search.toLowerCase()) ||
+      opp.description.toLowerCase().includes(search.toLowerCase())
+      : true
+  );
 
   return (
     <DashboardLayout>
       <div className="space-y-6">
         <div>
-          {/* Conditional Heading for Role-based Dashboards */}
           <h2 className="text-3xl font-bold text-gray-900 dark:text-white">
             {isVolunteer ? "Opportunities for You" : "Manage Opportunities"}
           </h2>
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mt-1">
             <p className="text-gray-600 dark:text-gray-400">
               {isVolunteer
-                ? "Find and apply for new tasks near you"
-                : "View, edit, or delete the opportunities you have posted"}
+                ? "Find and apply for tasks near you"
+                : "View, edit, or delete your posted opportunities"}
             </p>
             {search && (
               <Link
@@ -61,39 +86,42 @@ const Opportunities = () => {
           </div>
         </div>
 
-        {/* Improved Loading State */}
-        {loading ? (
+        {loading && (
           <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="animate-spin text-emerald-600 mb-4" size={48} />
+            <Loader2 className="animate-spin text-emerald-600 mb-4" size={40} />
             <p className="text-gray-500 font-medium">Fetching opportunities...</p>
           </div>
-        ) : !data.length ? (
-          /* Enhanced Empty State UI */
+        )}
+
+        {!loading && filtered.length === 0 && (
           <div className="bg-white dark:bg-gray-800 p-16 rounded-2xl border-2 border-dashed border-gray-200 dark:border-gray-700 text-center flex flex-col items-center">
-            <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-full mb-4">
-              <Search className="text-gray-400" size={40} />
-            </div>
+            <Search className="text-gray-400 mb-4" size={40} />
             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-              No Opportunities Found
+              {search ? `No results for "${search}"` : "No Opportunities Found"}
             </h3>
             <p className="text-gray-500 dark:text-gray-400 max-w-sm">
-              {isVolunteer
-                ? "There are no active tasks at the moment. Please check back later!"
-                : "You haven't posted any opportunities yet. Start by creating one."}
+              {search
+                ? "Try a different search term."
+                : isVolunteer
+                  ? "There are no active tasks at the moment. Please check back later!"
+                  : "You haven't posted any opportunities yet. Start by creating one."}
             </p>
           </div>
-        ) : (
-          /* Grid Layout for Opportunity Cards */
+        )}
+
+        {!loading && filtered.length > 0 && (
           <div className="grid gap-4">
-            {data.map((opp) => (
+            {filtered.map((opp) => (
               <OpportunityCard
                 key={opp._id}
                 opportunity={opp}
-                onDelete={fetchData} // Refresh list after successful delete
+                onDelete={fetchData}
+                applicationStatus={appStatuses[opp._id.toString()] ?? null}
               />
             ))}
           </div>
         )}
+
       </div>
     </DashboardLayout>
   );
