@@ -78,7 +78,7 @@ const Navbar1 = () => {
   };
 
   const role = user.role?.toLowerCase();
-  const dashboardPath = role === "ngo" ? "/dashboard/ngo" : "/dashboard/volunteer";
+  const dashboardPath = role === "admin" ? "/admin" : (role === "ngo" ? "/dashboard/ngo" : "/dashboard/volunteer");
 
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-100 dark:border-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">

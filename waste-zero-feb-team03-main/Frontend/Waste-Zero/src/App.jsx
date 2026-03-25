@@ -14,6 +14,10 @@ import Login from "./pages/loginpage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import ResetPassword from "./pages/ResetPassword"; // ← NEW
+import SchedulePickup from "./pages/SchedulePickup";
+import Settings from "./pages/Settings";
+import Support from "./pages/Support";
+import Impact from "./pages/Impact";
 import Opportunities from "./pages/Opportunities";
 import CreateOpportunity from "./pages/CreateOpportunity";
 import EditOpportunity from "./pages/EditOpportunity";
@@ -25,7 +29,13 @@ import NGOMatches from "./pages/NGOMatches";
 // Milestone 3
 import Matches from "./pages/Matches";
 import ChatRoom from "./pages/ChatRoom";
-import MessageInbox from "./pages/MessageInbox"; // ← NEW
+import MessageInbox from "./pages/MessageInbox";
+
+// Admin Pages
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import UserManagement from "./pages/Admin/UserManagement";
+import OpportunityModeration from "./pages/Admin/OpportunityModeration";
+import AdminReports from "./pages/Admin/AdminReports";
 
 const SocketManager = () => {
   const { user } = useAuth();
@@ -75,6 +85,10 @@ const AppContent = () => {
 
         {/* Shared protected */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/schedule" element={<ProtectedRoute><SchedulePickup /></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+        <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
+        <Route path="/impact" element={<ProtectedRoute><Impact /></ProtectedRoute>} />
 
         <Route path="/chat/messages" element={<ProtectedRoute><MessageInbox /></ProtectedRoute>} />
         <Route path="/chat/:userId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
@@ -89,6 +103,12 @@ const AppContent = () => {
         <Route path="/create-opportunity" element={<ProtectedRoute role="ngo"><CreateOpportunity /></ProtectedRoute>} />
         <Route path="/opportunities/edit/:id" element={<ProtectedRoute role="ngo"><EditOpportunity /></ProtectedRoute>} />
         <Route path="/ngo/matches" element={<ProtectedRoute role="ngo"><NGOMatches /></ProtectedRoute>} />
+
+        {/* Admin */}
+        <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute role="admin"><UserManagement /></ProtectedRoute>} />
+        <Route path="/admin/opportunities" element={<ProtectedRoute role="admin"><OpportunityModeration /></ProtectedRoute>} />
+        <Route path="/admin/reports" element={<ProtectedRoute role="admin"><AdminReports /></ProtectedRoute>} />
       </Routes>
     </>
   );

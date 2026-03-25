@@ -31,7 +31,7 @@ const Sidebar = () => {
     { icon: LayoutDashboard, label: "Dashboard", path: dashboardPath },
     { icon: Calendar, label: "Schedule Pickup", path: "/schedule" },
     { icon: Briefcase, label: "Opportunities", path: "/opportunities" },
-    { icon: MessageSquare, label: "Messages", path: "/messages" },
+    { icon: MessageSquare, label: "Messages", path: "/chat/messages" },
     { icon: Leaf, label: "My Impact", path: "/impact" },
   ];
 
@@ -39,7 +39,7 @@ const Sidebar = () => {
     { icon: User, label: "My Profile", path: "/profile" },
     { icon: Settings, label: "Settings", path: "/settings" },
     { icon: HelpCircle, label: "Help & Support", path: "/support" },
-    { icon: Shield, label: "Admin Panel", path: "/admin" },
+    ...(user?.role?.toLowerCase() === "admin" ? [{ icon: Shield, label: "Admin Panel", path: "/admin" }] : []),
   ];
 
   const NavItem = ({ item }) => {

@@ -13,6 +13,7 @@ import opportunityRoutes from './routes/opportunityRoutes.js';
 import matchRoutes from './routes/matchRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import adminRoutes from './routes/adminRoutes.js';
 
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -28,7 +29,7 @@ const corsOptions = {
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 };
- 
+
 app.use(cors(corsOptions));
 
 app.use(cors({ origin: process.env.CLIENT_URL || '*', credentials: true }));
@@ -41,6 +42,7 @@ app.use('/opportunities', opportunityRoutes);
 app.use('/matches', matchRoutes);
 app.use('/messages', messageRoutes);
 app.use('/notifications', notificationRoutes);
+app.use('/admin', adminRoutes);
 
 app.get('/', (req, res) => res.send('Backend is running...'));
 

@@ -26,8 +26,15 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['volunteer', 'NGO'],
-    required: true
+    enum: ['volunteer', 'NGO', 'admin'],
+    required: true,
+    index: true
+  },
+  status: {
+    type: String,
+    enum: ['active', 'suspended'],
+    default: 'active',
+    index: true
   },
   skills: [String],
   location: String,

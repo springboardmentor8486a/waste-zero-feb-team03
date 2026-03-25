@@ -13,7 +13,7 @@ const router = express.Router();
 const messageLimiter = rateLimit({
   windowMs: 60 * 1000,
   max: 30,
-  keyGenerator: (req) => req.user?._id?.toString() || req.ip,
+  keyGenerator: (req) => req.user?._id?.toString() || 'anonymous',
   message: { message: 'Too many messages. Please slow down.' },
 });
 
