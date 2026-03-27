@@ -10,7 +10,8 @@ import {
   Shield,
   LogOut,
   Sun,
-  Moon
+  Moon,
+  Users 
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
@@ -22,30 +23,51 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Determine dashboard path based on user role
-  const dashboardPath = user?.role?.toLowerCase() === "ngo"
-    ? "/dashboard/ngo"
-    : "/dashboard/volunteer";
+  // FIX: Normalize role to handle any trailing spaces or casing from the DB
+  const userRole = user?.role?.toLowerCase().trim();
 
-  const menuItems = [
-    { icon: LayoutDashboard, label: "Dashboard", path: dashboardPath },
-    { icon: Calendar, label: "Schedule Pickup", path: "/schedule" },
-    { icon: Briefcase, label: "Opportunities", path: "/opportunities" },
-    { icon: MessageSquare, label: "Messages", path: "/chat/messages" },
-    { icon: Leaf, label: "My Impact", path: "/impact" },
-  ];
+  // --- CONDITIONAL MENU ITEMS ---
+  const getMenuItems = () => {
+    if (userRole === "admin") {
+      return [
+        { icon: LayoutDashboard, label: "Dashboard", path: "/admin" },
+        { icon: Users, label: "Manage Users", path: "/admin/users" },
+        { icon: Briefcase, label: "Manage Opps", path: "/admin/opportunities" },
+        { icon: MessageSquare, label: "System Messages", path: "/chat/messages" },
+      ];
+    }
+    
+    if (userRole === "ngo") {
+      return [
+        { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard/ngo" },
+        // Replaced "Post Opportunity" with your original "Opportunities" tab
+        { icon: Briefcase, label: "Opportunities", path: "/opportunities" }, 
+        { icon: MessageSquare, label: "Messages", path: "/chat/messages" },
+      ];
+    }
+
+    // Default: Volunteer
+    return [
+      { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard/volunteer" },
+      { icon: Calendar, label: "Schedule Pickup", path: "/schedule" },
+      { icon: Briefcase, label: "Opportunities", path: "/opportunities" },
+      { icon: MessageSquare, label: "Messages", path: "/chat/messages" },
+      { icon: Leaf, label: "My Impact", path: "/impact" },
+    ];
+  };
+
+  const menuItems = getMenuItems();
 
   const settingsItems = [
     { icon: User, label: "My Profile", path: "/profile" },
     { icon: Settings, label: "Settings", path: "/settings" },
     { icon: HelpCircle, label: "Help & Support", path: "/support" },
-    ...(user?.role?.toLowerCase() === "admin" ? [{ icon: Shield, label: "Admin Panel", path: "/admin" }] : []),
+    ...(userRole === "admin" ? [{ icon: Shield, label: "Admin Panel", path: "/admin" }] : []),
   ];
 
   const NavItem = ({ item }) => {
-    // Special handling for Dashboard to highlight both /dashboard/ngo and /dashboard/volunteer
     const isActive = item.label === "Dashboard"
-      ? location.pathname.startsWith("/dashboard")
+      ? (location.pathname.startsWith("/dashboard") || location.pathname === "/admin")
       : location.pathname.startsWith(item.path);
 
     return (
@@ -62,8 +84,17 @@ const Sidebar = () => {
     );
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
-    <div className="w-64 bg-slate-900 text-white h-screen flex flex-col p-4 transition-colors duration-300 dark:bg-black border-r border-gray-800">
+    <div className="w-64 bg-slate-900 text-white h-screen flex flex-col p-4 transition-colors duration-300 dark:bg-black border-r border-gray-800 shrink-0">
 
       {/* Top Section */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden pr-2">
@@ -76,11 +107,13 @@ const Sidebar = () => {
         <div className="mb-6 px-4 py-4 bg-gray-800 rounded-lg">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 rounded-full bg-emerald-500 flex items-center justify-center text-white font-bold">
-              {user?.name?.charAt(0).toUpperCase() || "U"}
+              {user?.name?.charAt(0).toUpperCase() || "A"}
             </div>
-            <div>
-              <p className="text-sm font-semibold text-white truncate">{user?.name || "User"}</p>
-              <p className="text-xs capitalize text-gray-400">{user?.role || "user"}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{user?.name || "Aditya"}</p>
+              <p className="text-[10px] uppercase tracking-widest text-emerald-400 font-bold">
+                {userRole || "ADMIN"}
+              </p>
             </div>
           </div>
         </div>
@@ -105,6 +138,14 @@ const Sidebar = () => {
               {settingsItems.map((item) => (
                 <NavItem key={item.label} item={item} />
               ))}
+              
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors mt-4"
+              >
+                <LogOut size={20} />
+                <span className="font-medium">Logout</span>
+              </button>
             </div>
           </div>
         </div>

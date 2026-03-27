@@ -1,19 +1,18 @@
 import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { socket, connectSocket, disconnectSocket } from "./utils/socket";
 
-// Layout
 import Navbar1 from "./components/layout/Navbar1";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
-// Pages
 import LandingPage from "./pages/LandingPage";
 import Login from "./pages/loginpage";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
-import ResetPassword from "./pages/ResetPassword"; // ← NEW
+import ResetPassword from "./pages/ResetPassword";
 import SchedulePickup from "./pages/SchedulePickup";
 import Settings from "./pages/Settings";
 import Support from "./pages/Support";
@@ -26,12 +25,10 @@ import NGODashboard from "./pages/Dashboard/NGODashboard";
 import OpportunityApplicants from "./pages/OpportunityApplicants";
 import NGOMatches from "./pages/NGOMatches";
 
-// Milestone 3
 import Matches from "./pages/Matches";
 import ChatRoom from "./pages/ChatRoom";
 import MessageInbox from "./pages/MessageInbox";
 
-// Admin Pages
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import UserManagement from "./pages/Admin/UserManagement";
 import OpportunityModeration from "./pages/Admin/OpportunityModeration";
@@ -42,7 +39,6 @@ const SocketManager = () => {
 
   useEffect(() => {
     if (user) {
-      // Connect only after user is logged in 
       connectSocket();
 
       socket.on("connect", () => {
@@ -53,7 +49,6 @@ const SocketManager = () => {
         console.error("❌ WebSocket Error:", err.message);
       });
     } else {
-      // Disconnect when user logs out
       disconnectSocket();
     }
 
@@ -76,14 +71,12 @@ const AppContent = () => {
       {shouldShowNavbar && <Navbar1 />}
 
       <Routes>
-        {/* Public */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/opportunities" element={<Opportunities />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* Shared protected */}
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/schedule" element={<ProtectedRoute><SchedulePickup /></ProtectedRoute>} />
         <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
@@ -93,18 +86,15 @@ const AppContent = () => {
         <Route path="/chat/messages" element={<ProtectedRoute><MessageInbox /></ProtectedRoute>} />
         <Route path="/chat/:userId" element={<ProtectedRoute><ChatRoom /></ProtectedRoute>} />
 
-        {/* Volunteer */}
         <Route path="/dashboard/volunteer" element={<ProtectedRoute role="volunteer"><VolunteerDashboard /></ProtectedRoute>} />
         <Route path="/matches" element={<ProtectedRoute role="volunteer"><Matches /></ProtectedRoute>} />
 
-        {/* NGO */}
         <Route path="/dashboard/ngo" element={<ProtectedRoute role="ngo"><NGODashboard /></ProtectedRoute>} />
         <Route path="/opportunities/:id/applicants" element={<ProtectedRoute role="ngo"><OpportunityApplicants /></ProtectedRoute>} />
         <Route path="/create-opportunity" element={<ProtectedRoute role="ngo"><CreateOpportunity /></ProtectedRoute>} />
         <Route path="/opportunities/edit/:id" element={<ProtectedRoute role="ngo"><EditOpportunity /></ProtectedRoute>} />
         <Route path="/ngo/matches" element={<ProtectedRoute role="ngo"><NGOMatches /></ProtectedRoute>} />
 
-        {/* Admin */}
         <Route path="/admin" element={<ProtectedRoute role="admin"><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/users" element={<ProtectedRoute role="admin"><UserManagement /></ProtectedRoute>} />
         <Route path="/admin/opportunities" element={<ProtectedRoute role="admin"><OpportunityModeration /></ProtectedRoute>} />
@@ -118,6 +108,23 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
+        <Toaster 
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              background: '#1f2937',
+              color: '#fff',
+              borderRadius: '8px',
+            },
+            success: {
+              iconTheme: {
+                primary: '#10b981',
+                secondary: '#fff',
+              },
+            },
+          }} 
+        />
         <BrowserRouter>
           <SocketManager />
           <AppContent />
