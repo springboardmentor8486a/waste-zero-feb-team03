@@ -45,25 +45,32 @@ export const registerUser = async (req, res) => {
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-
+ 
     if (!email || !password) {
       return res.status(400).json({ message: "Please provide email and password" });
     }
-
+ 
     const user = await User.findOne({ email }).select("+password");
-
-    if (user && (await user.comparePassword(password))) {
-      res.json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        location: user.location,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(401).json({ message: "Invalid credentials" });
+ 
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: "Invalid credentials" });
     }
+ 
+    // Block suspended accounts AFTER verifying credentials so we don't leak account existence to someone who doesn't know the password.
+    if (user.status === "suspended") {
+      return res.status(403).json({
+        message: "Your account has been suspended. Please contact support."
+      });
+    }
+ 
+    res.json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      location: user.location,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
 import validator from 'validator';
@@ -44,6 +43,10 @@ const userSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Compound index — optimises admin queries that filter by both role AND status,
+// e.g. User.find({ role: 'NGO', status: 'active' }) used by getOverviewStats.
+userSchema.index({ role: 1, status: 1 });
 
 // Hash password before saving
 userSchema.pre('save', async function () {
