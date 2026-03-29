@@ -33,6 +33,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import UserManagement from "./pages/Admin/UserManagement";
 import OpportunityModeration from "./pages/Admin/OpportunityModeration";
 import AdminReports from "./pages/Admin/AdminReports";
+import AdminLogs from "./pages/Admin/AdminLogs"; 
 
 const SocketManager = () => {
   const { user } = useAuth();
@@ -99,6 +100,7 @@ const AppContent = () => {
         <Route path="/admin/users" element={<ProtectedRoute role="admin"><UserManagement /></ProtectedRoute>} />
         <Route path="/admin/opportunities" element={<ProtectedRoute role="admin"><OpportunityModeration /></ProtectedRoute>} />
         <Route path="/admin/reports" element={<ProtectedRoute role="admin"><AdminReports /></ProtectedRoute>} />
+        <Route path="/admin/logs"           element={<ProtectedRoute role="admin"><AdminLogs /></ProtectedRoute>} />
       </Routes>
     </>
   );

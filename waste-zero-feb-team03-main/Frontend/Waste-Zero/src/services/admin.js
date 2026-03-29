@@ -3,13 +3,12 @@ import api from "./api";
 const adminService = {
     getOverview: async () => {
         const response = await api.get('/admin/overview');
-        return response.data;
+        return response; 
     },
 
     getUsers: async (params) => {
-        // params can be { page, limit, role, status }
         const response = await api.get('/admin/users', { params });
-        return response.data;
+        return response; 
     },
 
     updateUserStatus: async (id, status) => {
@@ -17,9 +16,14 @@ const adminService = {
         return response.data;
     },
 
+    deleteUser: async (id) => {
+        const response = await api.patch(`/admin/users/${id}/status`, { status: 'suspended' });
+        return response.data;
+    },
+
     getOpportunities: async (params) => {
         const response = await api.get('/admin/opportunities', { params });
-        return response.data;
+        return response; 
     },
 
     deleteOpportunity: async (id) => {
@@ -27,14 +31,14 @@ const adminService = {
         return response.data;
     },
 
-    getReports: async () => {
-        const response = await api.get('/admin/reports');
-        return response.data;
+    getReports: async (params = {}) => {
+        const response = await api.get('/admin/reports', { params });
+        return response; 
     },
 
     getLogs: async (params) => {
         const response = await api.get('/admin/logs', { params });
-        return response.data;
+        return response; 
     }
 };
 
