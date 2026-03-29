@@ -18,8 +18,8 @@ const OpportunityModeration = () => {
     const fetchOpportunities = async () => {
         setLoading(true);
         try {
-            const data = await adminService.getOpportunities(filters);
-            setOpportunities(data.data || data);
+            const response = await adminService.getOpportunities(filters);
+            setOpportunities(response.data?.data || []);  
             setError(null);
         } catch (err) {
             setError("Failed to connect to the server. Please check your backend connection.");
