@@ -17,11 +17,13 @@ const logAdminAction = async (action, adminId, metadata = {}) => {
 };
 
 // @route   GET /admin/overview
+// @desc    Get dashboard overview statistics
 export const getOverviewStats = async (req, res) => {
     try {
-        const totalUsers = await User.countDocuments();
+        // FIX: Only count users who are NOT admins to show "2" instead of "3"
+        const totalUsers = await User.countDocuments({ role: { $ne: 'admin' } });
         
-        // Match 'NGO' or 'ngo' and handle missing status field from your DB image
+        // Handle 'NGO'/'ngo' casing and missing status fields
         const activeNGOs = await User.countDocuments({ 
             role: { $in: ['NGO', 'ngo'] },
             $or: [{ status: 'active' }, { status: { $exists: false } }]
@@ -119,7 +121,6 @@ export const deleteOpportunity = async (req, res) => {
     }
 };
 
-// --- ADDED THIS BACK TO FIX THE CRASH ---
 // @route   GET /admin/logs
 export const getLogs = async (req, res) => {
     try {
